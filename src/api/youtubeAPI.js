@@ -96,9 +96,9 @@ export const fetchTopChannels = async () => {
   }
 };
 
-const youtubeAPI {
+const youtubeAPI = {
   fetchTopChannels,
   fetchChannelStats,
   searchChannels,
-}
+};
 export default youtubeAPI;
