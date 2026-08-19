@@ -1,11 +1,9 @@
 import axios from 'axios';
 
-const YOUTUBE_API_KEY = process.env.REACT_APP_YOUTUBE_API_KEY;
+const YOUTUBE_API_KEY = process.env.REACT_APP_YOUTUBE_API_KEY || process.env.VITE_YOUTUBE_API_KEY;
 const YOUTUBE_BASE_URL = 'https://www.googleapis.com/youtube/v3';
 
-// Danh sách ID của hàng loạt kênh YouTube lớn nhất thế giới hiện nay
 const TOP_CHANNEL_IDS = [
-  // Top Siêu Kênh
   "UCX6OQ3DkcsbYNE6H8uQQuVA", // MrBeast
   "UCq-Fj5jknLsUf-MWSy4_brA", // T-Series
   "UCbCmjCuTUZos6Inko4uObCA", // Cocomelon
@@ -23,39 +21,11 @@ const TOP_CHANNEL_IDS = [
   "UC3IZKseVptid5gZsXtQ4ESQ", // HYBE LABELS
   "UC0C-w0YjGpqDXGB8IHb662A", // Justin Bieber
   "UCqECaJ8Gagnn7YCbPEzWH6g", // Taylor Swift
-  "UCpDJl2x257Uu26b1g0344gg", // Eminem
+  "UCpDJl2EmP7Oh9Oeqm1d3kVA", // Eminem
   "UC0p5jTmjiX754O1E1S7bUug", // Ed Sheeran
-  "UCbW18jz5qZEZ53A-Agp2iWA", // Ariana Grande
-  "UC2XdaAVUannp6vAgX1de8Rw", // Dude Perfect
-  "UC9CoOnJkIBMdeijd9lYoT_g", // Marshmello
-  "UCYfdidRxbB8Qhf0Nx7ioOYw", // Alan Walker
-  "UCY30JRSgdt31ERvqVIi_9CA", // Katy Perry
-  "UCfM3zsQsOnfWNUppiycmBuw", // Mark Rober
-  "UCso27yOBy6_H1S62P0y41qg", // Bright Side
-  "UC_aEa8K-EOJ3D6gOs7HcyNg", // NoCopyrightSounds
-  "UCsooa4yRKGN_zEE8iknghZA", // TED-Ed
-  "UC56gL3f2cE2p3e-vW05S3gA", // Badabun
-  "UCa10ninUBCNyGSZX4-f25Lg", // Whinderssonnunes
-  
-  // Các kênh giải trí & âm nhạc lớn khác
-  "UCG8rbF3g2AMX70yOdEZpdHA", // Wave Music
-  "UCk8GzjMOrta8yxDCkfylJYw", // Toys and Colors
-  "UC9KhB_oZ4kC_4u608y6u6Cg", // Zee TV
-  "UCB_qr75GzE31p4B76P36j5w", // BillionSurpriseFarms
-  "UC3gNmTGu-QCMhRQIeX3yK1A", // Get Movies
-  "UCk2_Xy6e0S5O-PZ258Y5Ewg", // Pinkfong Baby Shark
-  "UCUp2XpP2R744X7jFqWk4R9A", // Movieclips
-  "UCF_f5j89i0C4eS5C347W57g", // Shakira
-  "UC3g0D98R1mN8x36pUaXyM_Q", // Selena Gomez
-  "UC0A73YI_T1f3v9g309_7vGA", // Rihanna
-  "UCXzp4E948BqS94I5tW98XkQ", // Bruno Mars
-  "UCpko_-a4R4v_R6G9O-F6VvQ", // WWE Music
-  "UCg_C3nO3uI0i3-XqU45aI7g", // Speed Records
-  "UC0K2s_w-sD1o_M8g8Xz4mDA", // Shemaroo Filmi Gaane
-  "UCf3C60L46B18G56_P7B73cA", // ChuChu TV
+  "UCbW18jz5qZEZ53A-Agp2iWA"  // Ariana Grande
 ];
 
-// Hàm chia nhỏ mảng ID thành từng nhóm 50 ID (giới hạn tối đa của YouTube API)
 const chunkArray = (array, size) => {
   const chunks = [];
   for (let i = 0; i < array.length; i += size) {
@@ -66,11 +36,9 @@ const chunkArray = (array, size) => {
 
 export const fetchTopChannels = async () => {
   try {
-    // Chia danh sách ID thành các nhóm 50
     const idBatches = chunkArray(TOP_CHANNEL_IDS, 50);
     let allChannels = [];
 
-    // Gọi API cho từng nhóm (mỗi nhóm tốn đúng 1 point)
     for (const batch of idBatches) {
       const response = await axios.get(`${YOUTUBE_BASE_URL}/channels`, {
         params: {
@@ -96,7 +64,6 @@ export const fetchTopChannels = async () => {
       }
     }
 
-    // Tự động sắp xếp các kênh theo số lượng đăng ký từ cao xuống thấp
     return allChannels.sort((a, b) => b.subscriberCount - a.subscriberCount);
   } catch (error) {
     console.error('Lỗi khi tải dữ liệu kênh:', error.message);
@@ -134,9 +101,28 @@ export const fetchChannelStats = async (channelId) => {
   }
 };
 
+export const searchChannels = async (query) => {
+  try {
+    const response = await axios.get(`${YOUTUBE_BASE_URL}/search`, {
+      params: {
+        part: 'snippet',
+        q: query,
+        type: 'channel',
+        maxResults: 20,
+        key: YOUTUBE_API_KEY,
+      },
+    });
+    return response.data.items || [];
+  } catch (error) {
+    console.error('Lỗi khi tìm kiếm:', error.message);
+    return [];
+  }
+};
+
 const youtubeAPI = {
   fetchTopChannels,
   fetchChannelStats,
+  searchChannels,
 };
 
 export default youtubeAPI;
