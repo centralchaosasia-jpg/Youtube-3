@@ -1,3 +1,29 @@
+import React, { useEffect, useState } from 'react';
+import { fetchTopChannels } from './api/youtubeAPI';
+import CompareChannels from './components/CompareChannels'; // Import component so sánh
+
+function App() {
+  const [channels, setChannels] = useState([]);
+
+  useEffect(() => {
+    fetchTopChannels().then((data) => {
+      setChannels(data);
+    });
+  }, []);
+
+  return (
+    <div className="App" style={{ padding: '20px' }}>
+      <h1 style={{ textAlign: 'center' }}>YouTube Analytics Dashboard</h1>
+      
+      {/* Khung So Sánh 2 Kênh */}
+      <CompareChannels channels={channels} />
+
+      {/* Dưới đây là phần code hiển thị danh sách kênh cũ của bạn */}
+    </div>
+  );
+}
+
+export default App;
 import React, { useState, useEffect } from 'react';
 import Dashboard from './pages/Dashboard';
 import DarkMode from './components/DarkMode';
